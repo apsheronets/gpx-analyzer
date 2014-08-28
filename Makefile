@@ -1,4 +1,4 @@
-PACKAGES = extlib,xml-light
+PACKAGES = extlib,xmlm
 FILES = common.ml
 
 NAME = gpx-analyzer
