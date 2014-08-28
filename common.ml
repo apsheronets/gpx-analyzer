@@ -36,6 +36,7 @@ let () =
         | _ -> ());
       let lon = (!x1 +. !x2) /. 2.
       and lat = (!y1 +. !y2) /. 2. in
-      Printf.printf "Center point: %f %f\n" lon lat
+      Printf.printf "Center point: %f %f\n" lon lat;
+      exit 0
   )
   | _ -> assert false
