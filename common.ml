@@ -8,6 +8,7 @@ let () =
   and y1 = ref 999.
   and y2 = ref (-999.)
   and points_count = ref 0
+  and tracks = ref 0
   and track_segments = ref 0 in
   let rec skip i d =
     match Xmlm.input i with
@@ -17,10 +18,11 @@ let () =
   let rec pull i =
     match Xmlm.input i with
     | `El_start ((_, "gpx"), _) ->
-        let rec pull i =
+        let rec pull_trk i =
           match Xmlm.input i with
           | `El_end -> ()
           | `El_start ((_, "trk"), _) ->
+              incr tracks;
               let rec pull_trkseg i =
                 match Xmlm.input i with
                 | `El_end -> ()
@@ -51,9 +53,9 @@ let () =
                 | `El_start _ -> skip i 1; pull_trkseg i
                 | _ -> pull_trkseg i in
               pull_trkseg i
-          | `El_start _ -> skip i 1; pull i
-          | _ -> pull i in
-        pull i
+          | `El_start _ -> skip i 1; pull_trk i
+          | _ -> pull_trk i in
+        pull_trk i
     | `El_start _ -> skip i 1; pull i
     | _ -> pull i in
   pull i;
@@ -62,5 +64,6 @@ let () =
   and lat = (!y1 +. !y2) /. 2. in
   Printf.printf "center point: %f %f\n" lon lat;
   Printf.printf "points count: %d\n" !points_count;
+  Printf.printf "tracks: %d\n" !tracks;
   Printf.printf "track segments: %d\n" !track_segments;
   exit 0
