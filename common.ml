@@ -3,7 +3,9 @@ open Xml
 let (>>) f g = g f
 
 let () =
-  let xml = Xml.parse_in stdin in
+  let xml =
+    try Xml.parse_in stdin
+    with (Xml.Error e) as exc -> print_endline (Xml.error e); raise exc in
   match xml with
   | Element ("gpx", _, xmls) -> (
       let touched = ref false in
