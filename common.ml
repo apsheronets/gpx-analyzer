@@ -7,7 +7,7 @@ let () =
   and x2 = ref (-999.)
   and y1 = ref 999.
   and y2 = ref (-999.)
-  and points_count = ref 0
+  and points = ref 0
   and tracks = ref 0
   and track_segments = ref 0 in
   let rec skip i d =
@@ -32,7 +32,7 @@ let () =
                       match Xmlm.input i with
                       | `El_end -> ()
                       | `El_start ((_, "trkpt"), attrs) ->
-                          incr points_count;
+                          incr points;
                           attrs >> List.iter (function
                             | ((_, "lon"), lon) ->
                                 let lon = float_of_string lon in
@@ -59,11 +59,11 @@ let () =
     | `El_start _ -> skip i 1; pull i
     | _ -> pull i in
   pull i;
-  if !points_count = 0 then (prerr_endline "no points"; exit 1);
+  if !points = 0 then (prerr_endline "no points"; exit 1);
   let lon = (!x1 +. !x2) /. 2.
   and lat = (!y1 +. !y2) /. 2. in
   Printf.printf "center point: %f %f\n" lon lat;
-  Printf.printf "points count: %d\n" !points_count;
+  Printf.printf "points: %d\n" !points;
   Printf.printf "tracks: %d\n" !tracks;
   Printf.printf "track segments: %d\n" !track_segments;
   exit 0
