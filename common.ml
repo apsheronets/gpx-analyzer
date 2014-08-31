@@ -1,6 +1,8 @@
 open ExtLib
 let (>>) f g = g f
 
+type latlon = float * float (* who cares *)
+
 let distance (lat1, lon1) (lat2, lon2) =
   let r = 6378137. in (* radius of earth *)
   let pi = 4.0 *. atan 1.0 in
@@ -21,7 +23,8 @@ let () =
   and points = ref 0
   and tracks = ref 0
   and track_segments = ref 0
-  and length = ref 0. in
+  and length = ref 0.
+  and start_point = ref None in
   let rec skip i d =
     match Xmlm.input i with
     | `El_start ((_, s), _) -> skip i (d + 1)
@@ -47,22 +50,25 @@ let () =
                       | `El_end -> length := !length +. !track_segment_length
                       | `El_start ((_, "trkpt"), attrs) ->
                           incr points;
-                          let point_lon = ref None in
                           let point_lat = ref None in
+                          let point_lon = ref None in
                           attrs >> List.iter (function
-                            | ((_, "lon"), lon) ->
-                                let lon = float_of_string lon in
-                                point_lon := Some lon;
-                                if lon < !x1 then x1 := lon;
-                                if lon > !x2 then x2 := lon
-                            | ((_, "lat"), lat) ->
+                             | ((_, "lat"), lat) ->
                                 let lat = float_of_string lat in
                                 point_lat := Some lat;
                                 if lat < !y1 then y1 := lat;
                                 if lat > !y2 then y2 := lat
+                           | ((_, "lon"), lon) ->
+                                let lon = float_of_string lon in
+                                point_lon := Some lon;
+                                if lon < !x1 then x1 := lon;
+                                if lon > !x2 then x2 := lon
                             | _ -> ());
-                          (match !point_lon, !point_lat with
-                          | Some lon, Some lat ->
+                          (match !point_lat, !point_lon with
+                          | Some lat, Some lon ->
+                              (match !start_point with
+                              | None -> start_point := Some (lat, lon)
+                              | _ -> ());
                               (match !last_point with
                               | None -> ()
                               | Some p ->
@@ -86,9 +92,13 @@ let () =
     | _ -> pull i in
   pull i;
   if !points = 0 then (prerr_endline "no points"; exit 1);
-  let lon = (!x1 +. !x2) /. 2.
-  and lat = (!y1 +. !y2) /. 2. in
-  Printf.printf "center point: %f %f\n" lon lat;
+  let lat = (!y1 +. !y2) /. 2.
+  and lon = (!x1 +. !x2) /. 2. in
+  Printf.printf "center point: %f %f\n" lat lon;
+  (match !start_point with
+  | None -> assert false
+  | Some (lat, lon) ->
+      Printf.printf "start point: %f %f\n" lat lon);
   Printf.printf "points: %d\n" !points;
   Printf.printf "tracks: %d\n" !tracks;
   Printf.printf "track segments: %d\n" !track_segments;
