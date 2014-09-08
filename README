@@ -1,6 +1,7 @@
 usage:
 
 $ ./gpx-analyzer < ~/tracks/2014-07-28_07-15_Mon.gpx
+center point: 44.212189 39.932288
 start point: 44.219542 39.911310
 points: 1368
 tracks: 1
